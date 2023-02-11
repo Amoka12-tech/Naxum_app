@@ -11,11 +11,11 @@ apiRoute = axios.create({ baseURL: 'http://naxum_admin_demo.test/api' });
 // };
 
 apiRoute.interceptors.request.use(async (req) => {
-    const userData = await SecureStore.getItemAsync('@user');
+    const userData = await SecureStore.getItemAsync('_user');
     
-    if (!!userData) {
+    if (userData) {
       const data = JSON.parse(userData);
-      // console.log("Data: ", data.token);
+      console.log("Data: ", data.token);
       req.headers =  {
         'Accept': 'application/json',
         'Authorization': `Bearer ${data.token}`

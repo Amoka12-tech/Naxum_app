@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, TouchableOpacity, TextInput } from 'react-native'
+import { View, Text, ScrollView, TouchableOpacity, TextInput, ActivityIndicator } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import styles from '../styles'
 import { useDispatch, useSelector } from 'react-redux'
@@ -7,11 +7,16 @@ import { toggleDrawer } from '../../reducers/drawer'
 import { AntDesign, EvilIcons, Fontisto, MaterialCommunityIcons } from '@expo/vector-icons'
 import { grey, primary, white } from '../../assets/colors'
 import SingleContact from '../../components/SingleContact'
+import { get_user_contacts, search_user_contacts } from '../../actions/private'
 
 const MainScreen = ({ navigation, route }) => {
     const dispatch = useDispatch();
     const isDrawerOpen = useSelector(state => state.drawer.open);
-    const contacts = useSelector(state => state.contacts.contacts);
+    const contacts = useSelector(state => state.contacts);
+
+    // console.log(contacts);
+
+    const [processing, setProcessing] = useState(false);
 
     const drawerStatus =  useDrawerStatus()
 
@@ -25,11 +30,22 @@ const MainScreen = ({ navigation, route }) => {
         isDrawerOpen && navigation.openDrawer(true);
     }, [isDrawerOpen]);
 
-    const [search, setSearch] = useState(null);
+    const [searchQuery, setSearchQuery] = useState(null);
 
     const refresh_contacts = () => {
-      return null;
+      get_user_contacts(dispatch, setProcessing);
     };
+
+    useEffect(() => {
+      get_user_contacts(dispatch, setProcessing);
+    }, []);
+
+    const search = () => {
+      if (searchQuery) {
+        search_user_contacts(searchQuery, dispatch, setProcessing);
+      }
+    };
+
   return (
     <View style={{ flex: 1, }}>
       <ScrollView contentContainerStyle={styles.main_nav_view}>
@@ -40,7 +56,7 @@ const MainScreen = ({ navigation, route }) => {
         <View style={styles.action_button_holder}>
           <View style={styles.circl_box_holder}>
             <TouchableOpacity 
-              onPress={() => navigation.navigate('Contact')} 
+              onPress={() => navigation.navigate('Contact', { contacts: null })} 
               style={styles.circle_box}>
                 <MaterialCommunityIcons name='plus-box-multiple-outline' color={white} size={35} />
             </TouchableOpacity>
@@ -74,16 +90,18 @@ const MainScreen = ({ navigation, route }) => {
         <View style={styles.full_column_view}>
           <TextInput 
             placeholder='Search Contact'
-            value={search}
-            onChangeText={e => setSearch(e)}
+            value={searchQuery}
+            onChangeText={e => setSearchQuery(e)}
             style={[styles.login_input, { borderWidth: 1, padding: 10, fontSize: 16, borderRadius: 6, borderColor: grey, width: '80%', height: 35, }]} />
 
-          <TouchableOpacity style={[styles.login_button, { width: '80%', height: 35, marginTop: 10, }]}>
+          <TouchableOpacity onPress={search} style={[styles.login_button, { width: '80%', height: 35, marginTop: 10, }]}>
             <Text style={[styles.login_button_text]}>Search</Text>
           </TouchableOpacity>
         </View>
 
-        {contacts?.map((contact, index) => <SingleContact key={index.toString()} contact={contact} navigation={navigation} />)}
+        {processing && <ActivityIndicator size={'small'} color={primary} style={{ alignSelf: 'center' }} />}
+
+        {contacts?.contacts?.map((contact, index) => <SingleContact key={index.toString()} contact={contact} navigation={navigation} />)}
 
       </ScrollView>
 

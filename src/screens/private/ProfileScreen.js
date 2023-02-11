@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, Image, TouchableOpacity, TextInput } from 'react-native'
+import { View, Text, ScrollView, Image, TouchableOpacity, TextInput, ActivityIndicator } from 'react-native'
 import React, { useState } from 'react'
 import styles from '../styles'
 import { AntDesign, MaterialCommunityIcons } from '@expo/vector-icons'
@@ -6,22 +6,24 @@ import { grey, primary, white } from '../../assets/colors'
 import { useDispatch, useSelector } from 'react-redux'
 import { update_user } from '../../reducers/auth'
 import { show } from '../../reducers/message'
+import { update_user_profile } from '../../actions/auth'
 
 const user_image = require('../../assets/images/user.jpg');
 
 const ProfileScreen = ({ navigation }) => {
   const dispatch = useDispatch();
   const user = useSelector(state => state.auth.user);
-  console.log(user);
 
   const [firstname, setFirstname] = useState(user? user?.name?.split(" ", 2)[0] : null);
-  const [firstnameError, setFirstnameError] = useState(null);
-  const [lastname, setLastname] = useState(user? user?.name?.split(" ", 2)[1] : null);
-  const [lastnameError, setLastnameError] = useState(null);
+  const [firstnameError, setFirstnameError] = useState(false);
+  const [lastname, setLastname] = useState(user? user?.name?.replace(`${user?.name?.split(" ", 2)[0]} `, "") : null);
+  const [lastnameError, setLastnameError] = useState(false);
   const [phone, setPhone] = useState(user? user?.phone : null);
-  const [phoneError, setPhoneError] = useState(null);
+  const [phoneError, setPhoneError] = useState(false);
   const [email, setEmail] = useState(user? user?.email : null);
-  const [emailError, setEmailError] = useState(null);
+  const [emailError, setEmailError] = useState(false);
+
+  const [proceessing, setProcessing] = useState(false);
 
   const payload = {
     name: `${firstname} ${lastname}`,
@@ -35,15 +37,23 @@ const ProfileScreen = ({ navigation }) => {
   };
 
   const submit = () => {
-    dispatch(update_user(payload));
-    message.type = 'Success';
-    message.message = "Profile successfully updated!";
-    dispatch(show(message));
+    if (!firstname)
+      setFirstnameError(true);
+    if (!lastname)
+      setLastnameError(true);
+    if (!email)
+      setEmailError(true);
+    if (!phone)
+      setPhoneError(true);
+    if(firstname && lastname && email && phone) {
+      update_user_profile(payload, dispatch, setProcessing);
+    };
   }
 
 
   return (
     <View style={{ flex: 1, padding: 20, backgroundColor: white, }}>
+      {proceessing && <ActivityIndicator size={'small'} color={primary} />}
       <View style={styles.top_nav_holder}>
         <AntDesign onPress={() => navigation.goBack()} name='left' size={24} color={grey} />
         <Text style={styles.top_nav_title}>Profile</Text>

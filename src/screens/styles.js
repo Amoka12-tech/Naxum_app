@@ -16,6 +16,12 @@ const styles = StyleSheet.create({
       paddingLeft: 40,
       paddingRight: 40,
     },
+    loading_text: {
+        fontSize: 16,
+        fontFamily: fonts.Poppins_500Medium,
+        letterSpacing: 1,
+        color: primary,
+    },
     login_input: {
         width: '100%',
         height: 45,

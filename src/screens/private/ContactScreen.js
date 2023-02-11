@@ -1,17 +1,19 @@
-import { View, Text, ScrollView, Image, TouchableOpacity, TextInput } from 'react-native'
-import React, { useState } from 'react'
+import { View, Text, ScrollView, Image, TouchableOpacity, TextInput, ActivityIndicator, BackHandler } from 'react-native'
+import React, { useEffect, useState } from 'react'
 import styles from '../styles'
 import { AntDesign, MaterialCommunityIcons } from '@expo/vector-icons'
 import { grey, primary, red, white } from '../../assets/colors'
 import { useDispatch, useSelector } from 'react-redux'
 import { update_user } from '../../reducers/auth'
 import { show } from '../../reducers/message'
+import { create_user_contact, delete_user_contact, edit_user_contact } from '../../actions/private'
+import { useFocusEffect } from '@react-navigation/native'
 
 const user_image = require('../../assets/images/user.jpg');
 
 const ContactScreen = ({ navigation, route }) => {
   const dispatch = useDispatch();
-  const contact = route?.params?.contact;
+  const contact = route.params?.contact;
 
   const [firstname, setFirstname] = useState(contact? contact.firstname : null);
   const [firstnameError, setFirstnameError] = useState(null);
@@ -21,6 +23,9 @@ const ContactScreen = ({ navigation, route }) => {
   const [phoneError, setPhoneError] = useState(null);
   const [email, setEmail] = useState(contact? contact.email : null);
   const [emailError, setEmailError] = useState(null);
+
+  const [proceessing, setProcessing] = useState(false);
+
 
   const payload = {
     firstname: `${firstname}`,
@@ -36,13 +41,30 @@ const ContactScreen = ({ navigation, route }) => {
 
   const submit = () => {
     //check if details in params do update or create
-    dispatch(add_contact(payload));
-    message.type = 'Success';
-    message.message = "Profile successfully updated!";
-    dispatch(show(message));
+    !contact ? 
+      create_user_contact(payload, dispatch, setProcessing, navigation) 
+      : edit_user_contact(contact, payload, dispatch, setProcessing);
   }
 
-  const delete_ = () => {};
+  const delete_ = () => {
+    delete_user_contact(contact, dispatch, setProcessing, navigation);
+  };
+
+  useEffect(() => {
+    if(contact) {
+      console.log('found');
+      setFirstname(contact?.firstname);
+      setLastname(contact?.lastname);
+      setEmail(contact?.email);
+      setPhone(contact?.phone);
+    } else {
+      console.log('not found');
+      setFirstname(null);
+      setLastname(null);
+      setEmail(null);
+      setPhone(null);
+    }
+  }, [contact]);
 
 
   return (
@@ -55,6 +77,8 @@ const ContactScreen = ({ navigation, route }) => {
       <ScrollView 
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[styles.main_nav_view, { paddingLeft: 0, paddingRight: 0, minHeight: 0, width: '100%' }]}>
+
+          {proceessing && <ActivityIndicator size={'large'} color={primary} style={{ alignSelf: 'center' }} />}
 
         <View style={[styles.column_holder, { width: '100%', justifyContent: 'flex-start', alignItems: 'flex-start', }]}>
           <TextInput 

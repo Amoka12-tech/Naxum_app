@@ -1,5 +1,5 @@
 import { View, Text, TouchableOpacity } from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { createDrawerNavigator, useDrawerStatus } from '@react-navigation/drawer'
 import ProfileScreen from './ProfileScreen';
 import ContactScreen from './ContactScreen';
@@ -10,6 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { DrawerActions, useNavigation } from '@react-navigation/native';
 import { useDispatch } from 'react-redux';
 import { toggleDrawer } from '../../reducers/drawer';
+import { get_user_profile } from '../../actions/auth';
 
 const Drawer = createDrawerNavigator();
 
@@ -19,6 +20,10 @@ const HomeScreen = () => {
   const toggle = () => {
     dispatch(toggleDrawer(true))
   };
+
+  useEffect(() => {
+    get_user_profile();
+  }, []);
   
   return (
     <Drawer.Navigator 

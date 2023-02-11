@@ -20,7 +20,8 @@ const dummyData = [
 ];
 
 const initialData = {
-    contacts: dummyData,
+    contacts: null,
+    count: 0
 };
 
 const contactSlice = createSlice({
@@ -28,7 +29,8 @@ const contactSlice = createSlice({
     initialState: initialData,
     reducers: {
         all_contacts: (state, action) => {
-            state.contacts = action.payload
+            state.contacts = action.payload?.results,
+            state.count = action.payload?.count
         },
         edit_contact: (state, action) => {
             const contactIndex = state.contacts.findIndex(c => c.id === action.payload?.id);

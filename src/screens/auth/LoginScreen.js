@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native'
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native'
 import React, { useState } from 'react'
 import styles from '../styles';
 import { darkgrey, grey, primary } from '../../assets/colors';
@@ -6,6 +6,7 @@ import { show } from '../../reducers/message';
 import { useDispatch } from 'react-redux';
 import { AntDesign, FontAwesome5, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { authenticate } from '../../reducers/auth';
+import { login_user } from '../../actions/auth';
 
 const LoginScreen = () => {
   const dispatch = useDispatch();
@@ -13,52 +14,28 @@ const LoginScreen = () => {
   const [password, setPassword] = useState(null);
   const [usernameError, setUserNameError] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
-
-  const [isLogout, setIsLogout] = useState(false);
+  const [proceessing, setProcessing] = useState(false);
 
   const login = () => {
-    const data = {
-      username: username,
-      password: password,
+    if(!username){
+      setUserNameError(true);
+    }else if(!password){
+      setPasswordError(true);
+    }else if(!username && !password) {
+      setUserNameError(true);
+      setPasswordError(true);
+    } else {
+      const data = {
+        username: username,
+        password: password,
+      };
+      login_user(data, dispatch, setProcessing);
     };
-    // if(!username)
-    //   setUserNameError(true);
-    // if(!password)
-    //   setPasswordError(true);
-    if(username && password) {
-      setIsLogout(true);
-    }
-    const message = {
-      type: 'failed', //['failed' | 'success']
-      message: "Authentication failed!"
-    };
-    // dispatch(show(message));
-
-    const payloadData = {
-      user: {name: "Amoka Abdulmutalib", phone: "+2348034329120"},
-      token: "hbds6gdewhifew8woq|qe9"
-    };
-    dispatch(authenticate(payloadData))
   };
-
-  const LogoutModal = () => (
-    <View style={styles.confirm_modal}>
-      <Text style={styles.confirm_message_text}>Proceed Sign-out?</Text>
-
-      <View style={styles.confirm_button_holder}>
-        <TouchableOpacity onPress={() => setIsLogout(false)} style={styles.confirm_button}>
-          <Text style={styles.login_button_text}>Yes</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => setIsLogout(false)} style={styles.confirm_button}>
-          <Text style={styles.login_button_text}>Cancel</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
 
   return (
     <View style={styles.main_view}>
+      {proceessing && <ActivityIndicator size={'small'} color={primary} />}
       <View 
         style={{ 
           display: 'flex',
@@ -99,8 +76,6 @@ const LoginScreen = () => {
         <TouchableOpacity onPress={() => login()} style={styles.login_button}>
           <Text style={styles.login_button_text}>LOGIN</Text>
         </TouchableOpacity>
-
-        {isLogout && <LogoutModal />}
     </View>
   );
 };

@@ -31,7 +31,7 @@ const MessageModal = () => {
 
         <TouchableOpacity style={styles.box_button} onPress={closeMessageBox}>
             <Text style={styles.box_button_text}>
-                CANCEL
+                {message?.messageType === 'failed' ? 'CANCEL': 'OK'}
             </Text>
         </TouchableOpacity>
       </View>
